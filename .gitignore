@@ -1,0 +1,16 @@
+# Dades d'expedients (PDFs originals i sortides generades) — no es pugen al repo
+input/
+output/
+
+# Fulls Excel generats a partir de les extraccions
+*.xlsx
+
+# Fitxers temporals de Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Editor / SO
+.DS_Store
+Thumbs.db

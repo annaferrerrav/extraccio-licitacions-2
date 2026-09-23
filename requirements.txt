@@ -1,0 +1,11 @@
+# Aquest projecte no necessita cap paquet Python.
+#
+# - build_excel.py només usa "openpyxl" (i la llibreria estàndard de Python).
+# - comparador_licitacions.html és una pàgina web autònoma: no requereix
+#   instal·lació ni servidor, només obrir-la amb un navegador modern
+#   (Chrome, Edge o Firefox) amb connexió a internet la primera vegada,
+#   per carregar dues llibreries des de CDN (lectura d'Excel i tipografia).
+#   Cap dada del navegador s'envia enlloc: tot el processament és local.
+#
+# Si vols generar l'Excel consolidat amb build_excel.py:
+openpyxl>=3.1

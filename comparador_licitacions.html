@@ -1,0 +1,925 @@
+<title>Comparador de Licitacions</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --bg:#F5F4EF;
+  --surface:#FFFFFF;
+  --surface-2:#EEECE3;
+  --ink:#1B2029;
+  --ink-dim:#646B7A;
+  --border:#DFDBCE;
+  --accent:#1F3864;
+  --accent-strong:#14284A;
+  --accent-soft:#E6EBF5;
+  --ok:#1E7B34;
+  --ok-soft:#E3F3E7;
+  --warn:#B26B00;
+  --warn-soft:#FBEDDA;
+  --bad:#B02418;
+  --bad-soft:#FBE5E2;
+  --mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  --disp: 'Archivo', 'IBM Plex Sans', sans-serif;
+  --body: 'IBM Plex Sans', system-ui, sans-serif;
+  --shadow: 0 1px 2px rgba(20,20,15,.06), 0 8px 24px -12px rgba(20,20,15,.18);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#12151C;
+    --surface:#191D26;
+    --surface-2:#20242F;
+    --ink:#ECEEF3;
+    --ink-dim:#9AA2B4;
+    --border:#2B303C;
+    --accent:#8FA6D4;
+    --accent-strong:#B7C6E8;
+    --accent-soft:#1E2A40;
+    --ok:#59C27D;
+    --ok-soft:#173322;
+    --warn:#E3A94B;
+    --warn-soft:#3A2A12;
+    --bad:#E97C72;
+    --bad-soft:#3B1B18;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.6);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#12151C;
+  --surface:#191D26;
+  --surface-2:#20242F;
+  --ink:#ECEEF3;
+  --ink-dim:#9AA2B4;
+  --border:#2B303C;
+  --accent:#8FA6D4;
+  --accent-strong:#B7C6E8;
+  --accent-soft:#1E2A40;
+  --ok:#59C27D;
+  --ok-soft:#173322;
+  --warn:#E3A94B;
+  --warn-soft:#3A2A12;
+  --bad:#E97C72;
+  --bad-soft:#3B1B18;
+  --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.6);
+}
+*{box-sizing:border-box;}
+body{
+  background:var(--bg);
+  color:var(--ink);
+  font-family:var(--body);
+  padding-inline:20px;
+  padding-block:28px 60px;
+  max-width:1280px;
+  margin-inline:auto;
+}
+h1,h2,h3{font-family:var(--disp); text-wrap:balance; margin:0;}
+.top{
+  display:flex; align-items:flex-start; justify-content:space-between; gap:16px; flex-wrap:wrap;
+  margin-bottom:22px;
+}
+.top h1{font-size:1.7rem; font-weight:800; color:var(--accent-strong); letter-spacing:-.01em;}
+.top p{margin:.35rem 0 0; color:var(--ink-dim); font-size:.92rem; max-width:52ch;}
+.privacy{
+  display:flex; align-items:center; gap:8px;
+  font-size:.78rem; color:var(--ink-dim);
+  background:var(--surface); border:1px solid var(--border); border-radius:10px;
+  padding:8px 12px; box-shadow:var(--shadow);
+}
+.privacy .dot{width:8px;height:8px;border-radius:50%;background:var(--ok); flex:none;}
+
+.uploaders{
+  display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:22px;
+}
+@media (max-width:680px){ .uploaders{grid-template-columns:1fr;} }
+.dropzone{
+  background:var(--surface); border:1.5px dashed var(--border); border-radius:14px;
+  padding:20px; text-align:center; cursor:pointer; transition:border-color .15s, background .15s;
+  box-shadow:var(--shadow);
+}
+.dropzone:hover, .dropzone.drag{ border-color:var(--accent); background:var(--accent-soft); }
+.dropzone input{display:none;}
+.dropzone .label{
+  font-family:var(--disp); font-weight:700; font-size:.95rem; color:var(--ink);
+  display:flex; align-items:center; justify-content:center; gap:8px;
+}
+.dropzone .tag{
+  display:inline-block; font-size:.68rem; font-weight:600; letter-spacing:.04em; text-transform:uppercase;
+  padding:2px 8px; border-radius:999px; margin-bottom:8px;
+}
+.tag.ext{background:var(--accent-soft); color:var(--accent-strong);}
+.tag.man{background:var(--ok-soft); color:var(--ok);}
+.dropzone .hint{color:var(--ink-dim); font-size:.8rem; margin-top:6px;}
+.dropzone .file-info{
+  margin-top:10px; font-family:var(--mono); font-size:.78rem; color:var(--ink);
+  background:var(--surface-2); border-radius:8px; padding:6px 10px; text-align:left;
+  overflow-wrap:anywhere;
+}
+.dropzone .file-info b{color:var(--accent-strong);}
+.dropzone .error{color:var(--bad); font-size:.78rem; margin-top:8px; font-weight:500;}
+
+.actions{display:flex; gap:10px; align-items:center; margin-bottom:26px; flex-wrap:wrap;}
+button.primary{
+  font-family:var(--disp); font-weight:700; font-size:.88rem;
+  background:var(--accent); color:#fff; border:none; border-radius:10px;
+  padding:11px 20px; cursor:pointer; box-shadow:var(--shadow);
+}
+button.primary:disabled{ opacity:.4; cursor:not-allowed; }
+button.primary:not(:disabled):hover{ background:var(--accent-strong); }
+button.ghost{
+  font-family:var(--body); font-weight:600; font-size:.82rem;
+  background:transparent; color:var(--ink-dim); border:1px solid var(--border); border-radius:10px;
+  padding:10px 16px; cursor:pointer;
+}
+button.ghost:hover{ color:var(--bad); border-color:var(--bad); }
+.match-tol{font-size:.78rem; color:var(--ink-dim); display:flex; align-items:center; gap:6px;}
+.match-tol input{accent-color:var(--accent);}
+.hint-adjudicats{
+  font-size:.78rem; color:var(--warn); background:var(--warn-soft); border-radius:8px;
+  padding:8px 12px; margin:-16px 0 22px; max-width:60ch;
+}
+.hint-adjudicats b{font-weight:700;}
+
+#results{display:none;}
+#results.show{display:block;}
+
+.stat-row{
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:12px; margin-bottom:22px;
+}
+.stat{
+  background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:14px 16px;
+  box-shadow:var(--shadow);
+}
+.stat .k{font-size:.7rem; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-dim); font-weight:600;}
+.stat .v{font-family:var(--mono); font-size:1.5rem; font-weight:500; margin-top:4px; font-variant-numeric:tabular-nums;}
+.stat .v small{font-size:.9rem; color:var(--ink-dim); font-weight:400;}
+.stat.bad .v{color:var(--bad);}
+.stat.ok .v{color:var(--ok);}
+.stat .sub{font-size:.74rem; color:var(--ink-dim); margin-top:3px;}
+
+section.block{
+  background:var(--surface); border:1px solid var(--border); border-radius:14px;
+  padding:18px 20px 20px; margin-bottom:20px; box-shadow:var(--shadow);
+}
+section.block > h2{font-size:1.02rem; font-weight:700; color:var(--accent-strong); margin-bottom:2px;}
+section.block > .desc{font-size:.8rem; color:var(--ink-dim); margin-bottom:14px;}
+
+.tabs{display:flex; gap:6px; margin-bottom:12px;}
+.tabbtn{
+  font-family:var(--body); font-weight:600; font-size:.8rem; color:var(--ink-dim);
+  background:var(--surface-2); border:1px solid var(--border); border-radius:999px;
+  padding:6px 14px; cursor:pointer;
+}
+.tabbtn.active{background:var(--accent); color:#fff; border-color:var(--accent);}
+.tabpane{display:none;}
+.tabpane.active{display:block;}
+
+table.diff-table{
+  border-collapse:collapse; width:100%; font-size:.82rem;
+}
+table.diff-table th{
+  text-align:left; font-family:var(--disp); font-size:.72rem; text-transform:uppercase; letter-spacing:.03em;
+  color:var(--ink-dim); border-bottom:1.5px solid var(--border); padding:6px 10px; white-space:nowrap;
+}
+table.diff-table td{
+  padding:6px 10px; border-bottom:1px solid var(--border); font-variant-numeric:tabular-nums;
+}
+table.diff-table tr:last-child td{border-bottom:none;}
+table.diff-table td.num{font-family:var(--mono);}
+table.diff-table tr.mismatch td.diffcol{background:var(--bad-soft); color:var(--bad); font-weight:600;}
+table.diff-table tr:hover td{background:var(--surface-2);}
+
+.overflow-x{overflow-x:auto;}
+
+details.carpeta{
+  border:1px solid var(--border); border-radius:12px; margin-bottom:10px; overflow:hidden;
+}
+details.carpeta + details.carpeta{margin-top:10px;}
+details.carpeta summary{
+  cursor:pointer; padding:12px 16px; list-style:none; display:flex; align-items:center; justify-content:space-between;
+  gap:12px; flex-wrap:wrap; background:var(--surface-2); font-family:var(--disp); font-weight:700; font-size:.9rem;
+}
+details.carpeta summary::-webkit-details-marker{display:none;}
+details.carpeta summary .chev{transition:transform .15s; color:var(--ink-dim); font-weight:400;}
+details.carpeta[open] summary .chev{transform:rotate(90deg);}
+.summary-badges{display:flex; gap:6px; flex-wrap:wrap; font-family:var(--body); font-weight:600;}
+.badge{
+  font-size:.7rem; padding:2px 9px; border-radius:999px; white-space:nowrap;
+}
+.badge.neutral{background:var(--surface); color:var(--ink-dim); border:1px solid var(--border);}
+.badge.ok{background:var(--ok-soft); color:var(--ok);}
+.badge.bad{background:var(--bad-soft); color:var(--bad);}
+.badge.warn{background:var(--warn-soft); color:var(--warn);}
+
+.carpeta-body{padding:14px 16px 16px;}
+
+table.row-table{border-collapse:collapse; width:100%; font-size:.76rem;}
+table.row-table th{
+  text-align:left; font-family:var(--disp); font-size:.66rem; text-transform:uppercase; letter-spacing:.03em;
+  color:var(--ink-dim); border-bottom:1.5px solid var(--border); padding:5px 8px; white-space:nowrap; position:sticky; top:0; background:var(--surface);
+}
+table.row-table td{
+  padding:4px 8px; border-bottom:1px solid var(--border); vertical-align:top; max-width:190px;
+}
+table.row-table tr.pair-row:nth-child(even){background:var(--surface-2);}
+table.row-table tr.only-ext td{background:var(--warn-soft);}
+table.row-table tr.only-man td{background:var(--accent-soft);}
+.cellwrap .v-ext, .cellwrap .v-man{
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:190px;
+}
+.cellwrap .v-ext{color:var(--ink);}
+.cellwrap .v-man{color:var(--ink-dim); font-size:.72rem;}
+.cellwrap.mismatch{background:var(--bad-soft); border-radius:4px;}
+.cellwrap.mismatch .v-ext{color:var(--bad); font-weight:600;}
+.cellwrap.mismatch .v-man{color:var(--bad);}
+.cellwrap.skip{opacity:.45;}
+.rowtag{
+  font-size:.64rem; text-transform:uppercase; letter-spacing:.04em; font-weight:700; white-space:nowrap;
+}
+.rowtag.ext{color:var(--warn);}
+.rowtag.man{color:var(--accent);}
+.legend{display:flex; gap:14px; flex-wrap:wrap; font-size:.74rem; color:var(--ink-dim); margin-top:12px;}
+.legend .sw{display:inline-block; width:10px; height:10px; border-radius:3px; margin-right:5px; vertical-align:-1px;}
+
+.empty-hint{
+  font-size:.85rem; color:var(--ink-dim); text-align:center; padding:30px 10px;
+}
+.concurs-sel{font-size:.8rem; color:var(--ink-dim); display:flex; align-items:center; gap:6px;}
+.concurs-sel select{
+  font-family:var(--body); font-size:.82rem; color:var(--ink); background:var(--surface);
+  border:1px solid var(--border); border-radius:8px; padding:6px 8px; max-width:100%;
+}
+table.diff-table tr.clickable{cursor:pointer;}
+table.diff-table tr.selected td{background:var(--accent-soft);}
+table.diff-table td.bad{color:var(--bad); font-weight:600;}
+table.diff-table td.ok{color:var(--ok); font-weight:600;}
+table.diff-table td.fields{font-size:.74rem; color:var(--ink-dim); min-width:180px;}
+.verdict-row{display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom:14px;}
+.vchip{font-family:var(--disp); font-weight:700; font-size:.82rem; padding:6px 12px; border-radius:10px; border:1px solid var(--border); background:var(--surface-2); color:var(--ink-dim);}
+.vchip b{font-family:var(--mono); font-size:1rem; margin-right:4px;}
+.vchip.ok{background:var(--ok-soft); color:var(--ok); border-color:transparent;}
+.vchip.warn{background:var(--warn-soft); color:var(--warn); border-color:transparent;}
+.vchip.bad{background:var(--bad-soft); color:var(--bad); border-color:transparent;}
+.verdict{display:inline-block; font-family:var(--disp); font-weight:700; font-size:.72rem; letter-spacing:.03em; padding:3px 10px; border-radius:999px; white-space:nowrap;}
+.verdict.ok{background:var(--ok-soft); color:var(--ok);}
+.verdict.warn{background:var(--warn-soft); color:var(--warn);}
+.verdict.bad{background:var(--bad-soft); color:var(--bad);}
+.verdict.none{background:var(--surface-2); color:var(--ink-dim);}
+table.diff-table td.why{font-size:.72rem; color:var(--ink-dim); max-width:260px;}
+footer{margin-top:10px; font-size:.72rem; color:var(--ink-dim); text-align:center;}
+</style>
+
+<div class="top">
+  <div>
+    <h1>Comparador de Licitacions</h1>
+    <p>Contrasta l'Excel generat per <code>build_excel.py</code> amb la resposta correcta feta a mà: fitxers, proveïdors, imports i cel·la per cel·la.</p>
+  </div>
+  <div class="privacy"><span class="dot"></span>Tot es processa al navegador. Cap dada surt d'aquí.</div>
+</div>
+
+<div class="uploaders">
+  <label class="dropzone" id="dz-ext">
+    <span class="tag ext">Extracció</span>
+    <div class="label">📤 Excel de build_excel.py</div>
+    <div class="hint">Arrossega el fitxer o fes clic per triar-lo</div>
+    <input type="file" id="file-ext" accept=".xlsx,.xls">
+    <div class="file-info" id="info-ext" hidden></div>
+    <div class="error" id="err-ext" hidden></div>
+  </label>
+  <label class="dropzone" id="dz-man">
+    <span class="tag man">Resposta correcta</span>
+    <div class="label">✅ Excel fet a mà</div>
+    <div class="hint">Arrossega el fitxer o fes clic per triar-lo</div>
+    <input type="file" id="file-man" accept=".xlsx,.xls">
+    <div class="file-info" id="info-man" hidden></div>
+    <div class="error" id="err-man" hidden></div>
+  </label>
+</div>
+
+<div class="actions">
+  <button class="primary" id="btn-compare" disabled>Compara els fitxers</button>
+  <button class="ghost" id="btn-clear">Neteja les dades carregades</button>
+  <label class="match-tol"><input type="checkbox" id="opt-ci" checked> Ignora majúscules i espais extra en el text</label>
+  <label class="match-tol"><input type="checkbox" id="opt-adjudicats"> Compara només productes adjudicats</label>
+  <label class="match-tol"><input type="checkbox" id="opt-preus"> Compara només preus i referències</label>
+</div>
+<p class="hint-adjudicats" id="hint-adjudicats" hidden>Filtrant per <b>Adjudicat</b> als dos fitxers — útil si a la resposta correcta no hi ha desestimats/ofertes.</p>
+<p class="hint-adjudicats" id="hint-preus" hidden>Només es comparen <b>Referència</b>, <b>Preu màxim unitari</b>, <b>Preu unitari</b> i <b>Import total</b>. Descripció, proveïdor, marca, model… es mostren però no compten com a diferència.</p>
+
+<div id="results">
+  <div class="actions" style="margin-bottom:14px;">
+    <label class="concurs-sel">Concurs:
+      <select id="sel-concurs"><option value="">Tots els concursos</option></select>
+    </label>
+    <label class="match-tol"><input type="checkbox" id="opt-nook"> Mostra només els expedients no OK</label>
+    <button class="primary" id="btn-export">⬇ Descarrega Excel comparatiu</button>
+  </div>
+
+  <section class="block">
+    <h2>Resum per concurs</h2>
+    <div class="desc">Una fila per expedient amb la seva valoració. <b>OK</b> = tot coincideix · <b>Revisar</b> = imports i files quadren però hi ha diferències en camps descriptius (descripció, referència, model, marca, expedient) · <b>KO</b> = falten/sobren files o difereixen proveïdor, lot, quantitat, preus, import o estat. Clica una fila per filtrar la resta de l'anàlisi a aquell concurs.</div>
+    <div class="verdict-row" id="verdict-row"></div>
+    <div class="overflow-x"><table class="diff-table" id="tbl-concurs"></table></div>
+  </section>
+
+  <div class="stat-row" id="stat-row"></div>
+
+  <section class="block">
+    <h2>Files per proveïdor</h2>
+    <div class="desc">Nombre de línies de cada proveïdor, dins les carpetes presents a l'extracció.</div>
+    <div class="overflow-x"><table class="diff-table" id="tbl-proveidor"></table></div>
+  </section>
+
+  <section class="block">
+    <h2>Import per lot / proveïdor</h2>
+    <div class="desc">Suma de l'import total sense IVA agrupat per carpeta i lot, o per carpeta i proveïdor.</div>
+    <div class="tabs">
+      <button class="tabbtn active" data-tab="lot">Per lot</button>
+      <button class="tabbtn" data-tab="prov">Per proveïdor</button>
+    </div>
+    <div class="tabpane active" id="pane-lot"><div class="overflow-x"><table class="diff-table" id="tbl-lot"></table></div></div>
+    <div class="tabpane" id="pane-prov"><div class="overflow-x"><table class="diff-table" id="tbl-import-prov"></table></div></div>
+  </section>
+
+  <section class="block">
+    <h2>Fila per fila</h2>
+    <div class="desc">Una carpeta per bloc. Cada fila mostra el valor de l'extracció (superior) i el de la resposta correcta (inferior); vermell = no coincideix.</div>
+    <div id="carpetes-container"></div>
+    <div class="legend">
+      <span><span class="sw" style="background:var(--bad-soft); border:1px solid var(--bad);"></span>Cel·la diferent</span>
+      <span><span class="sw" style="background:var(--warn-soft); border:1px solid var(--warn);"></span>Fila només a l'extracció</span>
+      <span><span class="sw" style="background:var(--accent-soft); border:1px solid var(--accent);"></span>Fila només a la resposta correcta</span>
+    </div>
+  </section>
+</div>
+
+<footer>Comparador de Licitacions — processament 100% local al navegador</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+(function(){
+"use strict";
+
+var CORE = [
+  {key:'carpeta',      label:'Carpeta analitzada',                    type:'text'},
+  {key:'expedient',    label:'Expedient',                              type:'text'},
+  {key:'proveidor',    label:'Proveïdor',                              type:'text'},
+  {key:'descripcio',   label:'Descripció',                             type:'text'},
+  {key:'referencia',   label:'Referència',                             type:'text'},
+  {key:'model',        label:'Model',                                  type:'text'},
+  {key:'marca',        label:'Marca',                                  type:'text'},
+  {key:'preu_max',     label:'Preu màxim de licitació unitari',        type:'num'},
+  {key:'quantitat',    label:'Quantitat',                              type:'num'},
+  {key:'preu_unitari', label:'Preu unitari sense IVA',                 type:'num'},
+  {key:'import_total', label:'Import total sense IVA',                 type:'num'},
+  {key:'lot',          label:'Lot',                                    type:'text'},
+  {key:'estat',        label:'Adjudicat / Oferta / Desestimat',        type:'text'}
+];
+CORE.forEach(function(c){ c.normLabel = normHeader(c.label); });
+
+var CRITICAL = ['carpeta','proveidor','import_total'];
+var KO_FIELDS = ['proveidor','lot','quantitat','preu_unitari','import_total','estat','preu_max'];
+
+function verdictOf(g){
+  if(g.mRows.length === 0) return {cls:'none', label:'Sense resposta', why:'No hi ha files a la resposta correcta'};
+  var why = [];
+  var ie = sumBy(g.eRows, function(r){ return toNum(r.import_total); });
+  var im = sumBy(g.mRows, function(r){ return toNum(r.import_total); });
+  if(g.eRows.length !== g.mRows.length) why.push('files ' + g.eRows.length + '/' + g.mRows.length);
+  if(Math.abs(ie-im) >= 0.5) why.push('import ' + fmtMoney(ie-im));
+  if(g.extraE.length || g.extraM.length) why.push((g.extraE.length+g.extraM.length) + ' sense parella');
+  var labelOf = {}; CORE.forEach(function(c){ labelOf[c.key]=c.label; });
+  var koF = (preusOpt()? PREUS_FIELDS : KO_FIELDS).filter(function(k){ return g.fieldErr[k]; });
+  koF.forEach(function(k){ why.push(labelOf[k] + ' (' + g.fieldErr[k] + ')'); });
+  if(why.length) return {cls:'bad', label:'KO', why:why.join(' · ')};
+  if(g.mismatches) {
+    var soft = Object.keys(g.fieldErr).map(function(k){ return labelOf[k] + ' (' + g.fieldErr[k] + ')'; });
+    return {cls:'warn', label:'Revisar', why:soft.join(' · ')};
+  }
+  return {cls:'ok', label:'OK', why:'Tot coincideix'};
+}
+
+function stripAccents(s){ return s.normalize('NFD').replace(/[̀-ͯ]/g,''); }
+function normHeader(h){ return stripAccents(String(h==null?'':h)).toLowerCase().trim().replace(/\s+/g,' '); }
+function normText(v){ return String(v==null?'':v).trim().replace(/\s+/g,' '); }
+function normTextCI(v){ return stripAccents(normText(v)).toLowerCase(); }
+function toNum(v){
+  if(v===''||v===null||v===undefined) return null;
+  if(typeof v==='number') return isFinite(v)? v : null;
+  var s = String(v).trim();
+  if(s==='') return null;
+  s = s.replace(/\s/g,'').replace(/[€]/g,'');
+  if(s.indexOf(',')>=0 && s.indexOf('.')>=0){ s = s.replace(/\./g,'').replace(',', '.'); }
+  else if(s.indexOf(',')>=0){ s = s.replace(',', '.'); }
+  var n = parseFloat(s);
+  return isNaN(n)? null : n;
+}
+function fmtInt(n){ return n.toLocaleString('ca-ES'); }
+function fmtMoney(n){
+  if(n===null||n===undefined) return '—';
+  return n.toLocaleString('ca-ES', {minimumFractionDigits:2, maximumFractionDigits:2}) + ' €';
+}
+function displayVal(v, type){
+  if(v===''||v===null||v===undefined) return '—';
+  if(type==='num' && typeof v==='number'){ return v.toLocaleString('ca-ES', {maximumFractionDigits:2}); }
+  return String(v).trim() || '—';
+}
+function groupBy(arr, fn){
+  var m = {};
+  arr.forEach(function(x){ var k=fn(x); (m[k]=m[k]||[]).push(x); });
+  return m;
+}
+function sumBy(arr, fn){
+  var t = 0, any=false;
+  arr.forEach(function(x){ var n=fn(x); if(n!==null){ t+=n; any=true; } });
+  return any? t : 0;
+}
+
+function ciOpt(){ return document.getElementById('opt-ci').checked; }
+function adjudicatsOpt(){ return document.getElementById('opt-adjudicats').checked; }
+function preusOpt(){ return document.getElementById('opt-preus').checked; }
+var PREUS_FIELDS = ['referencia','preu_max','preu_unitari','import_total'];
+function isCompared(key){ return key!=='carpeta' && (!preusOpt() || PREUS_FIELDS.indexOf(key)>=0); }
+function isAdjudicat(r){ return normTextCI(r.estat) === 'adjudicat'; }
+function cellsEqual(a,b,type){
+  if(type==='num'){
+    var na=toNum(a), nb=toNum(b);
+    if(na===null && nb===null) return true;
+    if(na===null || nb===null) return false;
+    return Math.abs(na-nb) < 0.005;
+  }
+  var ci = ciOpt();
+  var ta = ci? normTextCI(a) : normText(a);
+  var tb = ci? normTextCI(b) : normText(b);
+  return ta===tb;
+}
+
+function parseWorkbook(arrayBuffer){
+  var wb = XLSX.read(new Uint8Array(arrayBuffer), {type:'array'});
+  var sheetName = wb.SheetNames[0];
+  var ws = wb.Sheets[sheetName];
+  var aoa = XLSX.utils.sheet_to_json(ws, {header:1, defval:'', raw:true});
+  var result = {rows:[], colIndex:{}, sheetName:sheetName, missing:[]};
+  if(!aoa.length) { result.missing = CRITICAL.slice(); return result; }
+  var header = aoa[0];
+  var colIndex = {};
+  header.forEach(function(h,i){
+    var nh = normHeader(h);
+    CORE.forEach(function(c){ if(nh===c.normLabel && colIndex[c.key]===undefined) colIndex[c.key]=i; });
+  });
+  var rows = [];
+  for(var r=1;r<aoa.length;r++){
+    var row = aoa[r];
+    var empty = row.every(function(v){ return v===''||v===null||v===undefined; });
+    if(empty) continue;
+    var obj = {};
+    CORE.forEach(function(c){ var idx=colIndex[c.key]; obj[c.key] = (idx!==undefined)? row[idx] : ''; });
+    rows.push(obj);
+  }
+  var missing = CRITICAL.filter(function(k){ return colIndex[k]===undefined; });
+  result.rows = rows; result.colIndex = colIndex; result.missing = missing;
+  return result;
+}
+
+function matchRows(eRows, mRows){
+  var usedE = {}, usedM = {}, pairs = [];
+  function key1(r){ var ref = normTextCI(r.referencia); return ref? ref : null; }
+  function key2(r){
+    var lot=normTextCI(r.lot);
+    if(preusOpt()){ var pu=toNum(r.preu_unitari); return (lot||pu!==null)? (lot+'|'+(pu===null?'':pu.toFixed(2))) : null; }
+    var prov=normTextCI(r.proveidor); return (lot||prov)? (lot+'|'+prov) : null;
+  }
+  function buildIndex(rows, keyFn){
+    var m = {};
+    rows.forEach(function(r,i){ var k=keyFn(r); if(k===null) return; (m[k]=m[k]||[]).push(i); });
+    return m;
+  }
+  var mIdx1 = buildIndex(mRows, key1);
+  eRows.forEach(function(er, ei){
+    if(usedE[ei]) return;
+    var k = key1(er);
+    if(k && mIdx1[k]){
+      var cands = mIdx1[k].filter(function(mi){ return !usedM[mi]; });
+      if(cands.length===1){ pairs.push({e:ei,m:cands[0],type:'referencia'}); usedE[ei]=1; usedM[cands[0]]=1; }
+    }
+  });
+  var mIdx2 = buildIndex(mRows, key2);
+  eRows.forEach(function(er, ei){
+    if(usedE[ei]) return;
+    var k = key2(er);
+    if(k && mIdx2[k]){
+      var cands = mIdx2[k].filter(function(mi){ return !usedM[mi]; });
+      if(cands.length===1){ pairs.push({e:ei,m:cands[0],type: preusOpt()? 'lot_preu' : 'lot_proveidor'}); usedE[ei]=1; usedM[cands[0]]=1; }
+    }
+  });
+  var remE = eRows.map(function(_,i){return i;}).filter(function(i){return !usedE[i];});
+  var remM = mRows.map(function(_,i){return i;}).filter(function(i){return !usedM[i];});
+  var n = Math.min(remE.length, remM.length);
+  for(var i=0;i<n;i++){ pairs.push({e:remE[i], m:remM[i], type:'ordre'}); usedE[remE[i]]=1; usedM[remM[i]]=1; }
+  var extraE = eRows.map(function(_,i){return i;}).filter(function(i){return !usedE[i];});
+  var extraM = mRows.map(function(_,i){return i;}).filter(function(i){return !usedM[i];});
+  return {pairs:pairs, extraE:extraE, extraM:extraM};
+}
+
+var state = { ext:null, man:null };
+var lastGroups = [];
+
+function exportVal(v, type){
+  if(v===null||v===undefined) return '';
+  if(type==='num'){ var n = toNum(v); return n===null? (String(v).trim()) : n; }
+  return String(v).trim();
+}
+
+function exportExcel(){
+  var groups = lastGroups;
+  if(!groups.length) return;
+  var fields = CORE.filter(function(c){ return c.key!=='carpeta'; });
+
+  // Full 1: valoració per expedient
+  var resum = [['Carpeta','Expedient','Valoració','Motiu','Files extracció','Files correcte','Import extracció','Import correcte','Diferència import','Cel·les OK (%)','Files sense parella']];
+  groups.forEach(function(g){
+    var ie = sumBy(g.eRows, function(r){ return toNum(r.import_total); });
+    var im = sumBy(g.mRows, function(r){ return toNum(r.import_total); });
+    var pct = g.comparedCols? Math.round(1000*(g.comparedCols-g.mismatches)/g.comparedCols)/10 : '';
+    resum.push([g.carpeta, g.eRows[0]? normText(g.eRows[0].expedient) : '', g.verdict.label, g.verdict.why,
+      g.eRows.length, g.mRows.length, Math.round(ie*100)/100, g.mRows.length? Math.round(im*100)/100 : '',
+      g.mRows.length? Math.round((ie-im)*100)/100 : '', pct, g.extraE.length + g.extraM.length]);
+  });
+
+  // Full 2: fila per fila, extracció vs correcte per cada camp
+  var head = ['Carpeta','Valoració expedient','Tipus de fila','Fila extracció','Aparellat per','Camps diferents'];
+  fields.forEach(function(c){ head.push(c.label + ' — extracció', c.label + ' — correcte', c.label + ' — OK'); });
+  var comp = [head];
+  var matchLabel = {referencia:'referència', lot_proveidor:'lot + proveïdor', lot_preu:'lot + preu unitari', ordre:'ordre'};
+  groups.forEach(function(g){
+    function line(er, mr, tipus, fila, via){
+      var diffs = [], cells = [];
+      fields.forEach(function(c){
+        var ve = er? exportVal(er[c.key], c.type) : '';
+        var vm = mr? exportVal(mr[c.key], c.type) : '';
+        var cmp = isCompared(c.key);
+        var ok = (er && mr && cmp)? cellsEqual(er[c.key], mr[c.key], c.type) : null;
+        if(ok===false) diffs.push(c.label);
+        cells.push(ve, vm, (er && mr && !cmp)? 'no comparat' : (ok===null? '' : (ok? 'OK' : 'DIFERENT')));
+      });
+      return [g.carpeta, g.verdict.label, tipus, fila, via, er&&mr? (diffs.length? diffs.join(', ') : 'cap') : '—'].concat(cells);
+    }
+    g.pairs.slice().sort(function(a,b){ return a.e-b.e; }).forEach(function(p){
+      comp.push(line(g.eRows[p.e], g.mRows[p.m], 'Parella', p.e+1, matchLabel[p.type]||p.type));
+    });
+    g.extraE.forEach(function(i){ comp.push(line(g.eRows[i], null, 'Només extracció', i+1, '')); });
+    g.extraM.forEach(function(i){ comp.push(line(null, g.mRows[i], 'Només correcte', '', '')); });
+  });
+
+  var wb = XLSX.utils.book_new();
+  var ws1 = XLSX.utils.aoa_to_sheet(resum);
+  ws1['!cols'] = [{wch:14},{wch:14},{wch:14},{wch:60},{wch:10},{wch:10},{wch:14},{wch:14},{wch:14},{wch:10},{wch:10}];
+  ws1['!autofilter'] = {ref: XLSX.utils.encode_range({s:{r:0,c:0}, e:{r:resum.length-1, c:resum[0].length-1}})};
+  var ws2 = XLSX.utils.aoa_to_sheet(comp);
+  ws2['!cols'] = head.map(function(h, i){ return {wch: i<6 ? 16 : (/ — OK$/.test(h)? 9 : 22)}; });
+  ws2['!autofilter'] = {ref: XLSX.utils.encode_range({s:{r:0,c:0}, e:{r:comp.length-1, c:head.length-1}})};
+  ws2['!freeze'] = {xSplit:1, ySplit:1};
+  XLSX.utils.book_append_sheet(wb, ws1, 'Valoració');
+  XLSX.utils.book_append_sheet(wb, ws2, 'Comparació');
+  var d = new Date(), pad = function(n){ return (n<10?'0':'')+n; };
+  var name = 'comparacio_' + (groups.length===1? groups[0].carpeta : groups.length + '_expedients') + '_' +
+    d.getFullYear() + pad(d.getMonth()+1) + pad(d.getDate()) + '.xlsx';
+  XLSX.writeFile(wb, name.replace(/[\\\/:*?"<>|]/g,'_'));
+}
+
+function wireDropzone(zoneId, inputId, infoId, errId, which){
+  var zone = document.getElementById(zoneId);
+  var input = document.getElementById(inputId);
+  input.addEventListener('change', function(){ if(input.files[0]) handleFile(input.files[0], which); });
+  zone.addEventListener('dragover', function(e){ e.preventDefault(); zone.classList.add('drag'); });
+  zone.addEventListener('dragleave', function(){ zone.classList.remove('drag'); });
+  zone.addEventListener('drop', function(e){
+    e.preventDefault(); zone.classList.remove('drag');
+    if(e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0], which);
+  });
+}
+
+function handleFile(file, which){
+  var infoEl = document.getElementById(which==='ext'?'info-ext':'info-man');
+  var errEl = document.getElementById(which==='ext'?'err-ext':'err-man');
+  errEl.hidden = true; errEl.textContent = '';
+  var reader = new FileReader();
+  reader.onload = function(e){
+    try{
+      var parsed = parseWorkbook(e.target.result);
+      if(parsed.missing.length){
+        errEl.hidden = false;
+        errEl.textContent = 'No trobo les columnes: ' + parsed.missing.map(function(k){
+          var c = CORE.filter(function(x){return x.key===k;})[0]; return c? c.label : k;
+        }).join(', ') + '. Revisa els noms de capçalera.';
+        infoEl.hidden = true;
+        state[which] = null;
+      } else {
+        parsed.fileName = file.name;
+        state[which] = parsed;
+        infoEl.hidden = false;
+        infoEl.innerHTML = '<b>' + escapeHtml(file.name) + '</b><br>' + parsed.rows.length + ' files · full "' + escapeHtml(parsed.sheetName) + '"';
+      }
+    }catch(err){
+      errEl.hidden = false;
+      errEl.textContent = 'No he pogut llegir aquest Excel (' + err.message + ').';
+      state[which] = null;
+    }
+    updateCompareBtn();
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function escapeHtml(s){
+  return String(s==null?'':s).replace(/[&<>"']/g, function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+  });
+}
+
+function updateCompareBtn(){
+  document.getElementById('btn-compare').disabled = !(state.ext && state.man);
+}
+
+wireDropzone('dz-ext','file-ext','info-ext','err-ext','ext');
+wireDropzone('dz-man','file-man','info-man','err-man','man');
+
+document.getElementById('btn-clear').addEventListener('click', function(){
+  state.ext = null; state.man = null;
+  ['ext','man'].forEach(function(which){
+    document.getElementById('file-'+which).value = '';
+    document.getElementById('info-'+which).hidden = true;
+    document.getElementById('err-'+which).hidden = true;
+  });
+  document.getElementById('sel-concurs').value = '';
+  document.getElementById('results').classList.remove('show');
+  updateCompareBtn();
+});
+
+document.getElementById('btn-compare').addEventListener('click', runCompare);
+document.getElementById('opt-ci').addEventListener('change', function(){
+  if(document.getElementById('results').classList.contains('show')) runCompare();
+});
+document.getElementById('opt-preus').addEventListener('change', function(){
+  document.getElementById('hint-preus').hidden = !this.checked;
+  if(document.getElementById('results').classList.contains('show')) runCompare();
+});
+document.getElementById('opt-adjudicats').addEventListener('change', function(){
+  document.getElementById('hint-adjudicats').hidden = !this.checked;
+  if(document.getElementById('results').classList.contains('show')) runCompare();
+});
+
+document.getElementById('sel-concurs').addEventListener('change', runCompare);
+document.getElementById('opt-nook').addEventListener('change', runCompare);
+document.getElementById('btn-export').addEventListener('click', exportExcel);
+
+document.querySelectorAll('.tabbtn').forEach(function(btn){
+  btn.addEventListener('click', function(){
+    document.querySelectorAll('.tabbtn').forEach(function(b){b.classList.remove('active');});
+    document.querySelectorAll('.tabpane').forEach(function(p){p.classList.remove('active');});
+    btn.classList.add('active');
+    document.getElementById('pane-' + btn.dataset.tab).classList.add('active');
+  });
+});
+
+function runCompare(){
+  var extRows = state.ext.rows, manRows = state.man.rows;
+  if(adjudicatsOpt()){
+    extRows = extRows.filter(isAdjudicat);
+    manRows = manRows.filter(isAdjudicat);
+  }
+  var extByCarpeta = groupBy(extRows, function(r){ return normText(r.carpeta); });
+  var manByCarpeta = groupBy(manRows, function(r){ return normText(r.carpeta); });
+  var carpetes = Object.keys(extByCarpeta).sort();
+
+  var groups = carpetes.map(function(cp){
+    var eRows = extByCarpeta[cp] || [];
+    var mRows = manByCarpeta[cp] || [];
+    var m = matchRows(eRows, mRows);
+    var mismatches = 0, comparedCols = 0, fieldErr = {};
+    m.pairs.forEach(function(p){
+      CORE.forEach(function(c){
+        if(!isCompared(c.key)) return;
+        comparedCols++;
+        if(!cellsEqual(eRows[p.e][c.key], mRows[p.m][c.key], c.type)){ mismatches++; fieldErr[c.key]=(fieldErr[c.key]||0)+1; }
+      });
+    });
+    return {carpeta:cp, eRows:eRows, mRows:mRows, pairs:m.pairs, extraE:m.extraE, extraM:m.extraM,
+             mismatches:mismatches, comparedCols:comparedCols, fieldErr:fieldErr};
+  });
+  groups.forEach(function(g){ g.verdict = verdictOf(g); });
+  renderVerdictSummary(groups);
+  if(document.getElementById('opt-nook').checked){
+    groups = groups.filter(function(g){ return g.verdict.cls !== 'ok'; });
+    carpetes = groups.map(function(g){ return g.carpeta; });
+  }
+
+  var sel = document.getElementById('sel-concurs');
+  var selected = sel.value;
+  if(selected && carpetes.indexOf(selected)<0) selected = '';
+  sel.innerHTML = '<option value="">Tots els concursos (' + carpetes.length + ')</option>' + groups.map(function(g){
+    var exp = g.eRows[0] ? normText(g.eRows[0].expedient) : '';
+    return '<option value="' + escapeHtml(g.carpeta) + '">' + escapeHtml(g.carpeta + (exp? ' — ' + exp : '')) + '</option>';
+  }).join('');
+  sel.value = selected;
+
+  renderConcursTable(groups, selected);
+  if(selected) groups = groups.filter(function(g){ return g.carpeta===selected; });
+  lastGroups = groups;
+
+  renderStats(groups, extRows, manRows);
+  renderProveidorTable(groups);
+  renderImportTables(groups);
+  renderRowByRow(groups);
+
+  document.getElementById('results').classList.add('show');
+}
+
+function renderVerdictSummary(groups){
+  var c = {ok:0, warn:0, bad:0, none:0};
+  groups.forEach(function(g){ c[g.verdict.cls]++; });
+  var html = '<span class="vchip"><b>' + groups.length + '</b>expedients</span>' +
+    '<span class="vchip ok"><b>' + c.ok + '</b>OK</span>' +
+    '<span class="vchip warn"><b>' + c.warn + '</b>Revisar</span>' +
+    '<span class="vchip bad"><b>' + c.bad + '</b>KO</span>' +
+    (c.none? '<span class="vchip"><b>' + c.none + '</b>sense resposta</span>' : '');
+  document.getElementById('verdict-row').innerHTML = html;
+}
+
+function renderConcursTable(groups, selected){
+  var rows = groups.map(function(g){
+    var exp = g.eRows[0] ? normText(g.eRows[0].expedient) : '';
+    var ie = sumBy(g.eRows, function(r){ return toNum(r.import_total); });
+    var im = sumBy(g.mRows, function(r){ return toNum(r.import_total); });
+    var diff = ie - im;
+    var pct = g.comparedCols? 100*(g.comparedCols-g.mismatches)/g.comparedCols : null;
+    var orphans = g.extraE.length + g.extraM.length;
+    var tr = '<tr class="clickable' + (g.carpeta===selected? ' selected':'') + '" data-carpeta="' + escapeHtml(g.carpeta) + '">' +
+      '<td><span class="verdict ' + g.verdict.cls + '">' + escapeHtml(g.verdict.label) + '</span></td>' +
+      '<td>' + escapeHtml(g.carpeta) + '</td><td>' + escapeHtml(exp) + '</td>';
+    if(g.mRows.length === 0){
+      return tr + '<td class="num">' + g.eRows.length + ' / 0</td><td class="num">' + fmtMoney(ie) + '</td>' +
+        '<td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td>' +
+        '<td class="why">' + escapeHtml(g.verdict.why) + '</td></tr>';
+    }
+    return tr +
+      '<td class="num ' + (g.eRows.length===g.mRows.length?'ok':'bad') + '">' + g.eRows.length + ' / ' + g.mRows.length + '</td>' +
+      '<td class="num">' + fmtMoney(ie) + '</td><td class="num">' + fmtMoney(im) + '</td>' +
+      '<td class="num ' + (Math.abs(diff)<0.5?'ok':'bad') + '">' + fmtMoney(diff) + '</td>' +
+      '<td class="num ' + (pct===null?'':(pct>99.9?'ok':(pct<95?'bad':''))) + '">' + (pct===null?'—':pct.toFixed(1)+'%') + '</td>' +
+      '<td class="num ' + (orphans?'bad':'ok') + '">' + orphans + '</td>' +
+      '<td class="why">' + escapeHtml(g.verdict.why) + '</td></tr>';
+  }).join('');
+  var tbl = document.getElementById('tbl-concurs');
+  tbl.innerHTML = '<thead><tr><th>Valoració</th><th>Carpeta</th><th>Expedient</th><th>Files ext. / corr.</th><th>Import extracció</th><th>Import correcte</th><th>Diferència</th><th>Cel·les OK</th><th>Sense parella</th><th>Motiu</th></tr></thead><tbody>' + rows + '</tbody>';
+  tbl.querySelectorAll('tr.clickable').forEach(function(row){
+    row.addEventListener('click', function(){
+      var sel = document.getElementById('sel-concurs');
+      sel.value = (sel.value===row.dataset.carpeta) ? '' : row.dataset.carpeta;
+      runCompare();
+    });
+  });
+}
+
+function renderStats(groups, extRows, manRows){
+  var filesExt = 0, filesMan = 0, mismatchCells = 0, comparedCells = 0, onlyExt = 0, onlyMan = 0;
+  groups.forEach(function(g){
+    filesExt += g.eRows.length;
+    filesMan += g.mRows.length;
+    mismatchCells += g.mismatches;
+    comparedCells += g.comparedCols;
+    onlyExt += g.extraE.length;
+    onlyMan += g.extraM.length;
+  });
+  var importExt = sumBy(extRows.filter(function(r){ return groups.some(function(g){return g.carpeta===normText(r.carpeta);}); }), function(r){ return toNum(r.import_total); });
+  var carpetesSet = {}; groups.forEach(function(g){ carpetesSet[g.carpeta]=1; });
+  var importMan = sumBy(manRows.filter(function(r){ return carpetesSet[normText(r.carpeta)]; }), function(r){ return toNum(r.import_total); });
+  var importDiff = importExt - importMan;
+  var matchPct = comparedCells? (100 * (comparedCells - mismatchCells) / comparedCells) : 100;
+
+  var stats = [
+    {k:'Carpetes comparades', v: groups.length, cls:''},
+    {k:'Files — extracció / correcte', v: fmtInt(filesExt) + ' <small>/ ' + fmtInt(filesMan) + '</small>', cls: filesExt===filesMan? 'ok':'bad'},
+    {k:'Import total — extracció', v: fmtMoney(importExt), cls:''},
+    {k:'Import total — correcte', v: fmtMoney(importMan), cls:''},
+    {k:'Diferència d\'import', v: fmtMoney(importDiff), cls: Math.abs(importDiff) < 0.5 ? 'ok':'bad'},
+    {k:'Cel·les coincidents', v: matchPct.toFixed(1) + '%', cls: matchPct>99.9?'ok': (matchPct<95?'bad':'')},
+    {k:'Files sense parella', v: fmtInt(onlyExt+onlyMan), cls: (onlyExt+onlyMan)? 'bad':'ok',
+     sub: onlyExt + ' només extracció · ' + onlyMan + ' només correcte'}
+  ];
+
+  var html = stats.map(function(s){
+    return '<div class="stat ' + (s.cls||'') + '"><div class="k">' + s.k + '</div><div class="v">' + s.v + '</div>' +
+      (s.sub? '<div class="sub">'+s.sub+'</div>' : '') + '</div>';
+  }).join('');
+  document.getElementById('stat-row').innerHTML = html;
+}
+
+function renderProveidorTable(groups){
+  var extCount = {}, manCount = {}, label = {};
+  groups.forEach(function(g){
+    g.eRows.forEach(function(r){
+      var k = normTextCI(r.proveidor) || '(buit)';
+      extCount[k] = (extCount[k]||0) + 1;
+      if(!label[k]) label[k] = normText(r.proveidor) || '(buit)';
+    });
+    g.mRows.forEach(function(r){
+      var k = normTextCI(r.proveidor) || '(buit)';
+      manCount[k] = (manCount[k]||0) + 1;
+      if(!label[k]) label[k] = normText(r.proveidor) || '(buit)';
+    });
+  });
+  var keys = Object.keys(label).sort(function(a,b){ return label[a].localeCompare(label[b],'ca'); });
+  var rows = keys.map(function(k){
+    var e = extCount[k]||0, m = manCount[k]||0;
+    return '<tr class="' + (e!==m?'mismatch':'') + '"><td>' + escapeHtml(label[k]) + '</td>' +
+      '<td class="num">' + e + '</td><td class="num">' + m + '</td>' +
+      '<td class="num diffcol">' + (e-m>0? '+':'') + (e-m) + '</td></tr>';
+  }).join('');
+  document.getElementById('tbl-proveidor').innerHTML =
+    '<thead><tr><th>Proveïdor</th><th>Extracció</th><th>Correcte</th><th>Diferència</th></tr></thead><tbody>' + rows + '</tbody>';
+}
+
+function renderImportTables(groups){
+  function buildGroupTable(dimKey, emptyLabel){
+    var extSum = {}, manSum = {}, label = {}, carp = {};
+    groups.forEach(function(g){
+      g.eRows.forEach(function(r){
+        var dv = normText(r[dimKey]) || emptyLabel;
+        var k = g.carpeta + '||' + normTextCI(dv);
+        extSum[k] = (extSum[k]||0) + (toNum(r.import_total)||0);
+        label[k] = dv; carp[k] = g.carpeta;
+      });
+      g.mRows.forEach(function(r){
+        var dv = normText(r[dimKey]) || emptyLabel;
+        var k = g.carpeta + '||' + normTextCI(dv);
+        manSum[k] = (manSum[k]||0) + (toNum(r.import_total)||0);
+        label[k] = dv; carp[k] = g.carpeta;
+      });
+    });
+    var keys = Object.keys(label).sort(function(a,b){
+      if(carp[a]!==carp[b]) return carp[a].localeCompare(carp[b]);
+      return label[a].localeCompare(label[b],'ca');
+    });
+    var rows = keys.map(function(k){
+      var e = extSum[k]||0, m = manSum[k]||0, diff = e-m;
+      var mismatch = Math.abs(diff) >= 0.5;
+      return '<tr class="' + (mismatch?'mismatch':'') + '"><td>' + escapeHtml(carp[k]) + '</td><td>' + escapeHtml(label[k]) + '</td>' +
+        '<td class="num">' + fmtMoney(e) + '</td><td class="num">' + fmtMoney(m) + '</td>' +
+        '<td class="num diffcol">' + fmtMoney(diff) + '</td></tr>';
+    }).join('');
+    return '<thead><tr><th>Carpeta</th><th>' + (dimKey==='lot'?'Lot':'Proveïdor') + '</th><th>Extracció</th><th>Correcte</th><th>Diferència</th></tr></thead><tbody>' + rows + '</tbody>';
+  }
+  document.getElementById('tbl-lot').innerHTML = buildGroupTable('lot', 'Sense lot');
+  document.getElementById('tbl-import-prov').innerHTML = buildGroupTable('proveidor', '(buit)');
+}
+
+function renderRowByRow(groups){
+  var container = document.getElementById('carpetes-container');
+  if(!groups.length){ container.innerHTML = '<div class="empty-hint">No hi ha cap carpeta a comparar.</div>'; return; }
+  var html = groups.map(function(g, gi){
+    var noAnswer = g.mRows.length === 0;
+    var badges = '<span class="verdict ' + g.verdict.cls + '">' + escapeHtml(g.verdict.label) + '</span><span class="badge neutral">' + g.eRows.length + ' extret · ' + g.mRows.length + ' correcte</span>';
+    if(noAnswer){
+      badges += '<span class="badge warn">sense resposta correcta</span>';
+    } else {
+      badges += g.mismatches===0 ? '<span class="badge ok">0 diferències</span>' : '<span class="badge bad">' + g.mismatches + ' diferències</span>';
+      if(g.extraE.length) badges += '<span class="badge warn">' + g.extraE.length + ' només extracció</span>';
+      if(g.extraM.length) badges += '<span class="badge bad">' + g.extraM.length + ' només correcte</span>';
+    }
+
+    var headCols = CORE.filter(function(c){ return c.key!=='carpeta'; });
+    var thead = '<tr><th>Fila</th>' + headCols.map(function(c){ return '<th>' + escapeHtml(c.label) + '</th>'; }).join('') + '</tr>';
+
+    var bodyRows = g.pairs.map(function(p){
+      var er = g.eRows[p.e], mr = g.mRows[p.m];
+      var cells = headCols.map(function(c){
+        var cmp = isCompared(c.key);
+        var eq = !cmp || cellsEqual(er[c.key], mr[c.key], c.type);
+        return '<td><div class="cellwrap' + (!cmp?' skip':(eq?'':' mismatch')) + '">' +
+          '<div class="v-ext">' + escapeHtml(displayVal(er[c.key], c.type)) + '</div>' +
+          '<div class="v-man">' + escapeHtml(displayVal(mr[c.key], c.type)) + '</div>' +
+          '</div></td>';
+      }).join('');
+      return '<tr class="pair-row"><td class="rowtag">#' + (p.e+1) + '</td>' + cells + '</tr>';
+    }).join('');
+
+    var extraERows = g.extraE.map(function(idx){
+      var er = g.eRows[idx];
+      var cells = headCols.map(function(c){ return '<td>' + escapeHtml(displayVal(er[c.key], c.type)) + '</td>'; }).join('');
+      return '<tr class="only-ext"><td class="rowtag ext">només extracció</td>' + cells + '</tr>';
+    }).join('');
+
+    var extraMRows = g.extraM.map(function(idx){
+      var mr = g.mRows[idx];
+      var cells = headCols.map(function(c){ return '<td>' + escapeHtml(displayVal(mr[c.key], c.type)) + '</td>'; }).join('');
+      return '<tr class="only-man"><td class="rowtag man">només correcte</td>' + cells + '</tr>';
+    }).join('');
+
+    return '<details class="carpeta"' + (gi===0 || groups.length===1?' open':'') + '>' +
+      '<summary><span>' + escapeHtml(g.carpeta) + ' <span class="chev">▸</span></span>' +
+      '<span class="summary-badges">' + badges + '</span></summary>' +
+      '<div class="carpeta-body"><div class="overflow-x"><table class="row-table"><thead>' + thead + '</thead><tbody>' +
+      bodyRows + extraERows + extraMRows + '</tbody></table></div></div></details>';
+  }).join('');
+  container.innerHTML = html;
+}
+
+})();
+</script>
