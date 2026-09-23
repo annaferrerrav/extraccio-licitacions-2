@@ -61,6 +61,12 @@ temporals de treball (text extret, imatges d'OCR...) dins
 `input/expedients/<CARPETA>/` per fer la feina, neteja'ls abans d'acabar:
 aquesta carpeta només ha de contenir els PDFs originals.
 
+**`input/` i `output/` estan exclosos del control de versions** (`.gitignore`):
+contenen PDFs i dades de contractació real, i no s'han de pujar al
+repositori remot de GitHub. Tampoc els `.xlsx` generats. Si es modifica el
+`.gitignore`, no s'hi ha de treure aquesta exclusió sense que l'usuari ho
+demani explícitament.
+
 ## Resposta final
 
 Un cop escrits els tres fitxers, la resposta final a l'usuari no ha de

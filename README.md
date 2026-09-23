@@ -17,6 +17,10 @@ Cada subcarpeta de `input/expedients/` és un identificador numèric (p. ex.
 `4161038`) i correspon a UN expedient de licitació. Mai es barregen documents
 de carpetes diferents.
 
+`input/` i `output/` no es pugen al repositori de GitHub (veure
+`.gitignore`): contenen PDFs i dades reals de contractació de l'hospital.
+El repositori remot només conté codi i documentació.
+
 ## Com s'executa una extracció
 
 1. Obrir el projecte a Claude Code (VS Code).
@@ -66,6 +70,13 @@ executar cada cop que s'acaba un expedient nou.
 Els detalls complets (què és una fila, com resoldre contradiccions entre
 documents, criteris de confiança, format de `control.json`...) són a
 `prompt_v1.md`.
+
+## Workflow detallat (`Workflow_extraccio_licitacions.md`)
+
+Explicació pas a pas del procés real que segueix Claude Code en processar un
+expedient (obertura de PDFs, detecció de capa de text, OCR si cal, extracció
+i normalització). Útil com a referència ràpida sense haver de rellegir tot
+`prompt_v1.md`. Hi ha també una versió en PDF del mateix document.
 
 ## Comparador d'extraccions (`comparador_licitacions.html`)
 
